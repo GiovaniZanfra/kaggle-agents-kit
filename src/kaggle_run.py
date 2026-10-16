@@ -33,7 +33,7 @@ from common import (CFG, EXTRA_DIR, FOLDS_PATH, KAGGLE_DIR, KIT_ROOT, NAME_RE, O
 
 SRC = Path(__file__).resolve().parent
 TOOLS = {"kaggle_run.py", "audit.py", "hill_climb.py", "make_folds.py", "new_exp.py", "new_note.py",
-         "top.py", "make_packet.py"}
+         "top.py", "make_packet.py", "campaign_report.py", "plotkit.py"}
 BUILD = KAGGLE_DIR / "build"
 PENDING = KAGGLE_DIR / "pending.json"
 FAILED = KAGGLE_DIR / "failed.json"

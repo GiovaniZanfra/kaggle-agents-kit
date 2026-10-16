@@ -19,8 +19,9 @@ consolida tudo em `LEARNINGS.md`, que todo agente lê antes de começar. É a
 "working memory" do time.
 
 **Verificação por números, não por palavras.** O CV oficial é recalculado do OOF
-salvo (`registry.csv`). O auditor compara o que o agente disse com o registry,
-procura vazamento e duplicata. É assim que se pega agente mentindo ou enrolando.
+salvo (`registry.csv`). O auditor procura vazamento e duplicata, e o
+`campaign_report.py` compara cada CV citado nos learnings com o registry. É assim
+que se pega agente mentindo ou enrolando.
 
 ---
 
@@ -35,6 +36,7 @@ repo/                         (versionado no git)
   prompts/                    um prompt por papel
   experiments/                scripts de experimento (<familia>_<autor>_<NNN>.py)
   experiments/_templates/     gbdt.py, blank.py, stack.py
+  skills/plot-story-report/   SKILL.md (cópia) + KIT.md (regras para o relatório de campanha)
   src/                        o contrato em código (ninguém edita além de você)
 
 artifacts/                    (fora do git; compartilhado entre worktrees)
@@ -45,6 +47,7 @@ artifacts/                    (fora do git; compartilhado entre worktrees)
   scripts/                    cópia exata do código que gerou cada artefato
   learnings/                  um arquivo por job (learnings/_done/ após consolidar)
   reports/                    audit.md, ensemble.md, workers.md, kaggle_logs/
+  reports/campaigns/cNN/      figs/, data.json, report_skeleton.md, report.md (um por campanha)
   ensembles/ subs/            pesos dos ensembles e CSVs candidatos à submissão
   kaggle/                     pacotes enviados ao Kaggle e fila de pendentes
 ```
@@ -62,7 +65,7 @@ descobre o checkout principal pelo git. Caminhos: `python src/top.py --where`.
 | **Bootstrap** | EDA, baseline, primeira lista de jobs | `00_bootstrap.md` | frontier, 1× por competição |
 | **Worker** | executa 1 job de `JOBS.md` | `10_worker.md` | Composer / Auto (uso incluído) |
 | **Duelista** | mesma tarefa, modelos diferentes, cada um no seu worktree | `20_best_of_n.md` | 2 modelos, só em tarefa de "melhor modelo único" |
-| **Gerente** | avalia workers, consolida memória, escreve a próxima campanha, monta ensemble | `30_manager.md` | frontier, 1 conversa por campanha |
+| **Gerente** | avalia workers, consolida memória, escreve a próxima campanha, monta ensemble, escreve o relatório da campanha | `30_manager.md` | frontier, 1 conversa por campanha |
 | **Auditor** | investiga cada FAIL/WARN do `audit.py` e dá veredito | `40_auditor.md` | Composer; frontier só se o caso for cabeludo |
 | **Consultor Pro** | resolve UMA tarefa difícil em turno único, fora do Cursor | `50_pro_packet.md` | ChatGPT Pro / Claude no navegador |
 
@@ -88,9 +91,10 @@ registry e entram no ensemble. Do vencedor, você aproveita o código.
 Você dispara os workers em paralelo (no Cursor: `/multitask`, um subagente por
 job; autor = id do job). Cada job gera experimentos novos + 1 learnings.
 
-**Fase 4 — Auditoria + ensemble.** `python src/audit.py`. Se houver FAIL/WARN,
-auditor investiga. Depois o gerente roda `python src/hill_climb.py --nested`,
-avalia os workers, consolida `LEARNINGS.md` e propõe a próxima campanha.
+**Fase 4 — Auditoria + ensemble + relatório.** `python src/audit.py`. Se houver
+FAIL/WARN, auditor investiga. Depois o gerente roda `hill_climb.py --nested` e
+`campaign_report.py`, avalia os workers, consolida `LEARNINGS.md`, propõe a
+próxima campanha e escreve o `report.md` da campanha (seção 7).
 
 **Fase 5 — Submissão (você).** Só se o CV *nested* do ensemble melhorar o
 anterior por mais que o ruído. Volta para a Fase 3.
@@ -127,17 +131,41 @@ esqueleto:
 
 ```
 # <job> — <autor> — <data>
-Objetivo do job:
-Experimentos registrados (nome → CV do registry):
-O que funcionou:
-O que não funcionou:
+Hipótese do job:
+Experimentos (nome | pai | CV copiado do top.py | o que mudou):
+Leitura (o que parece ter funcionado e por quê / o que não funcionou):
 Suspeitas / bugs encontrados:
 Próxima ideia (1–3, concretas):
 ```
 
+É curto e seco de propósito: quem mais lê é o gerente. Os deltas e o ruído o
+worker não precisa calcular — o `campaign_report.py` faz isso. O CV citado serve
+de detector: o script compara cada número com o registry.
+
 ---
 
-## 7. Anti-overfit
+## 7. Relatório da campanha (para você ler)
+
+Uma vez por campanha, não por job. Duas camadas:
+
+1. **`python src/campaign_report.py`** gera as figuras e os números direto do
+   registry, sem passar por nenhum agente: cada experimento contra o pai com o
+   ruído pareado entre folds (melhor / ruído / pior), a trajetória do melhor
+   modelo e do ensemble, e o peso de cada job no ensemble. Também checa os CVs
+   citados nos learnings e lista quem não escreveu learnings.
+2. **O gerente escreve o `report.md`** em cima disso com a skill
+   `skills/plot-story-report`, seguindo `KIT.md`: 300–600 palavras, todo número do
+   `data.json`, nada de explicação causal para resultado dentro do ruído.
+
+Por que não usar a skill em todo learnings: o learnings é lido por agentes e
+precisa ser comparável; narrativa bonita escrita pelo próprio worker convence
+mais sem ser mais verdadeira, e o formato "o que tentamos → o que funcionou"
+empurra explicação para diferenças que são ruído. No fim da competição, a mesma
+skill serve para o writeup público.
+
+---
+
+## 8. Anti-overfit
 
 - Decisão pelo CV no fold fixo. Para ensemble, só vale o **CV nested** do
   `hill_climb.py` (pesos escolhidos sem ver o fold avaliado).
@@ -149,7 +177,7 @@ Próxima ideia (1–3, concretas):
 
 ---
 
-## 8. Orçamento (Cursor Pro)
+## 9. Orçamento (Cursor Pro)
 
 - Treino roda no Kaggle: o agente gasta token escrevendo e lendo, não esperando.
 - Workers em Composer/Auto. Modelo frontier só no bootstrap, no gerente e em

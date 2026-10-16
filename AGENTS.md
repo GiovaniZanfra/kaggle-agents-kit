@@ -46,6 +46,7 @@ prompt (pasta `prompts/`) e, se você for worker, da sua linha em `JOBS.md`.
 | `python src/audit.py` | audita todos os artefatos → `reports/audit.md` |
 | `python src/hill_climb.py --nested` | ensemble + submissão candidata → `reports/ensemble.md` |
 | `python src/new_note.py --author w1 --job j3` | cria o arquivo de learnings do job |
+| `python src/campaign_report.py` | só o gerente: figuras e números da campanha a partir do registry |
 | `python src/make_packet.py "tarefa"` | pacote + prompt para consultar um modelo Pro no navegador |
 
 `reports/`, `learnings/`, `scripts/`, `subs/` ficam na pasta de artefatos

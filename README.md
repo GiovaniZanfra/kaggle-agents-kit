@@ -16,6 +16,7 @@ Funciona no **Cursor** e no **Claude Code** — o mesmo repo, as mesmas regras.
 | `JOBS.md` / `LEARNINGS.md` | fila da campanha e memória do time (o gerente mantém) |
 | `src/` | o contrato em código: folds, CV, registry, Kaggle, audit, ensemble |
 | `experiments/_templates/` | `gbdt.py` (XGBoost, GPU), `blank.py` (sklearn), `stack.py` (nível 2) |
+| `skills/plot-story-report/` | cópia da tua skill + `KIT.md`: o gerente usa para o relatório de cada campanha |
 
 ---
 
@@ -54,8 +55,9 @@ Funciona no **Cursor** e no **Claude Code** — o mesmo repo, as mesmas regras.
                        │
                        ▼
      gerente: ensemble nested, avalia workers, consolida memória, escreve JOBS.md
+              + relatório da campanha (figuras do registry + texto plot-story-report)
                        │
-                       ├──► você decide se submete
+                       ├──► você lê o report.md e decide se submete
                        └──► próxima campanha
 ```
 
@@ -81,6 +83,15 @@ Ou copie o texto abaixo da linha `<!-- PROMPT -->` e troque os `{CAMPOS}`.
 Não precisa de worktree para isso: pelo contrato cada job só cria arquivos novos
 e o registry tem lock. Worktree só aparece no `/best-of-n`, e mesmo lá os
 artefatos vão para a pasta compartilhada do checkout principal.
+
+**Relatório da campanha:** o gerente deixa em
+`artifacts/reports/campaigns/cNN/report.md` (abra com o preview de Markdown do
+Cursor). As 3 figuras principais saem do `campaign_report.py`, direto do registry:
+cada experimento contra o pai com o ruído pareado, a trajetória do CV e o peso de
+cada job no ensemble. O texto em volta é a skill plot-story-report com as regras do
+`skills/plot-story-report/KIT.md`. Se você só quiser os números, o
+`report_skeleton.md` da mesma pasta já tem tudo, inclusive a checagem dos CVs que
+os workers citaram.
 
 **Submissão (só você):**
 ```

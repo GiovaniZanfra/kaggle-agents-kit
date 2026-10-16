@@ -14,16 +14,14 @@ from common import LEARN_DIR, TOKEN_RE  # noqa: E402
 
 TEMPLATE = """# {job} — {author} — {date}
 
-Objetivo do job:
+Hipótese do job:
 
-Experimentos registrados (nome → CV copiado do registry / python src/top.py):
+Experimentos (um por linha: nome | pai | CV copiado de `python src/top.py --author {author}` | o que mudou):
 -
 
-O que funcionou:
--
-
-O que não funcionou:
--
+Leitura (o campaign_report.py calcula os deltas e o ruído; aqui vai a sua interpretação, curta):
+- o que parece ter funcionado e por quê:
+- o que não funcionou:
 
 Suspeitas / bugs encontrados:
 -
